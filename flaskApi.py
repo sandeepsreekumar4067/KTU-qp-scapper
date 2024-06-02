@@ -18,7 +18,7 @@ import random
 import string
 load_dotenv()
 def idConfig(length=10):
-    letters = string.ascii_letters  # You can also add string.digits or string.punctuation if needed
+    letters = string.ascii_letters #assigning ID to the links created for future reference
     return ''.join(random.choice(letters) for _ in range(length))
 def get_detailed_link(detail_page_url, driver):
         driver.get(detail_page_url)
@@ -89,23 +89,15 @@ def perform_search(search_key):
         driver.quit()
         return {"error": "Timed out waiting for search results to load"}
 
-    # Select maximum results per page
     driver.maximize_window()
 
     # Wait until the dropdown is present
     wait = WebDriverWait(driver, 10)
     results_per_page_dropdown = wait.until(EC.presence_of_element_located((By.ID, 'aspect_artifactbrowser_SimpleSearch_field_rpp')))
-
-    # Select 100 results per page
     select = Select(results_per_page_dropdown)
     select.select_by_value('100')
-
-    # Wait until the "Go" button is present
     go_button = wait.until(EC.presence_of_element_located((By.ID, 'aspect_artifactbrowser_SimpleSearch_field_submit')))
-
-    # Click the "Go" button to reload the page with 100 results per page
     go_button.click()
-
     # Wait for the page to reload and the results to be present
     try:
         WebDriverWait(driver, 30).until(
@@ -140,7 +132,7 @@ def perform_search(search_key):
     driver.quit()
 
     return search_results
-
+#initialise the API and flask
 @app.route('/search', methods=['GET'])
 def search():
     search_key = request.args.get('q')
