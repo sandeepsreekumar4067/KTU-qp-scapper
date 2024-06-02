@@ -14,8 +14,28 @@ import time
 import json
 from dotenv import load_dotenv
 import os
-
+import random
+import string
 load_dotenv()
+def idConfig(length=10):
+    letters = string.ascii_letters  # You can also add string.digits or string.punctuation if needed
+    return ''.join(random.choice(letters) for _ in range(length))
+def get_detailed_link(detail_page_url, driver):
+        driver.get(detail_page_url)
+        idLink = idConfig()
+        print("ID : ",idLink)
+        # Wait until the table is present
+        wait = WebDriverWait(driver, 10)
+        try:
+            print("analysing the table")
+            table = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'ds-table.file-list')))
+            soup = BeautifulSoup(driver.page_source, 'html.parser')
+            file_link = soup.find('table', class_='ds-table file-list').find('a')['href']
+            print("link found")
+            return file_link
+        except TimeoutException:
+            return None
+
 
 app = Flask(__name__)
 
@@ -37,12 +57,16 @@ def perform_search(search_key):
     IP = "http://202.88.225.92/"
     URL = "http://202.88.225.92/xmlui/community-list"
     driver.get(URL)
+    print("connecting....")
+
+    
 
     # Wait for the search field to be visible
     try:
         search_field = WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.CLASS_NAME, "ds-text-field"))
         )
+        print("loading fields....")
     except TimeoutException:
         driver.quit()
         return {"error": "Search field not found"}
@@ -59,6 +83,8 @@ def perform_search(search_key):
         WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.CLASS_NAME, "ds-artifact-item"))
         )
+        print("loading contents....")
+
     except TimeoutException:
         driver.quit()
         return {"error": "Timed out waiting for search results to load"}
@@ -85,6 +111,7 @@ def perform_search(search_key):
         WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.CLASS_NAME, "ds-artifact-item"))
         )
+        print("loading the search results")
     except TimeoutException:
         driver.quit()
         return {"error": "Timed out waiting for search results to load"}
@@ -100,11 +127,13 @@ def perform_search(search_key):
         href = IP + title_elem['href']
         author = result.find('span', class_='author').get_text(strip=True)
         date = result.find('span', class_='date').get_text(strip=True)
+        pdfLink = get_detailed_link(href,driver)
+        pdfLink=IP+pdfLink
         search_results.append({
             "Title": title,
             "Author": author,
             "Date": date,
-            "Href": href
+            "pdf_link":pdfLink
         })
 
     # Close the WebDriver
