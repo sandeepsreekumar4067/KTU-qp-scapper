@@ -22,7 +22,7 @@ This repository contains a Flask API that scrapes the web to retrieve question p
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/yourusername/ktu-scraper.git
+    git clone https://github.com/sandeepsreekumar4067/KTU-qp-scapper
     cd ktu-scraper
     ```
 
